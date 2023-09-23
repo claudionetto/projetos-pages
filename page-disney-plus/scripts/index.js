@@ -104,29 +104,39 @@ function addMovieInList(movie) {
   moviesElement.appendChild(movieElement);
 }
 
-function getMovieData(movie){
-  fetch(getUrlMovie(movie))
-  .then((response) => response.json())
-  .then((data) => {
-    const movieData = {
-      id: movie,
-      title: data.title,
-      genre: data.genres[0].name,
-      overview: data.overview,
-      vote_average: data.vote_average.toFixed([1]),
-      yearReleased: data.release_date.split("-")[0],
-      image: {
-        original: BASE_URL_IMAGE.original.concat(data.backdrop_path),
-        small: BASE_URL_IMAGE.small.concat(data.backdrop_path),
-      },
-    };
+async function getMovieData(movie){
 
-    movies.push(movieData);
-    addMovieInList(movieData);
-    
-  });
+  try {
+    await fetch(getUrlMovie(movie))
+    .then((response) => response.json())
+    .then((data) => {
+      const movieData = {
+        id: movie,
+        title: data.title,
+        genre: data.genres[0].name,
+        overview: data.overview,
+        vote_average: data.vote_average.toFixed(1), // Corrigi aqui
+        yearReleased: data.release_date.split("-")[0],
+        image: {
+          original: BASE_URL_IMAGE.original.concat(data.backdrop_path),
+          small: BASE_URL_IMAGE.small.concat(data.backdrop_path),
+        },
+      };
+
+      if(movies.some(element => element.id === movieData.id)){
+        return;
+      }
+
+      movies.push(movieData);
+      addMovieInList(movieData);
+      
+    });
+  } catch (error) {
+    console.log("erro", error)
+    alert("Insira um URL válido do site The Movie DB")
+  }
+
 }
-
 
 function loadMovies() {
   const LIST_MOVIES = [
@@ -135,41 +145,42 @@ function loadMovies() {
     "tt0800369",
   ];
 
-  const fetchPromises = LIST_MOVIES.map((movie, index) => {
-    fetch(getUrlMovie(movie))
-      .then((response) => response.json())
-      .then((data) => {
-        const movieData = {
-          id: movie,
-          title: data.title,
-          genre: data.genres[0].name,
-          overview: data.overview,
-          vote_average: data.vote_average.toFixed([1]),
-          yearReleased: data.release_date.split("-")[0],
-          image: {
-            original: BASE_URL_IMAGE.original.concat(data.backdrop_path),
-            small: BASE_URL_IMAGE.small.concat(data.backdrop_path),
-          },
-        };
+   LIST_MOVIES.map(async (movie, index) => {
 
-        movies.push(movieData);
+    await getMovieData(movie);
 
-        addMovieInList(movieData);
+    console.log(index);
 
-        if (index === LIST_MOVIES.length - 1) {
-          setMainMovie(movies[Math.floor(Math.random() * movies.length)]);
-        }
-      });
+    if(index === LIST_MOVIES.length - 1){
+      console.log(movies);
+      setMainMovie(movies[Math.floor(Math.random() * movies.length)]);
+    }
   });
 }
+
 
 const addMovieForm = document.getElementById('add-movie');
 
 addMovieForm.addEventListener('submit', (event) => {
   event.preventDefault();
 
-  const newMovie = event.target['movie'].value;
-  getMovieData(newMovie);
+  let newMovieId = event.target['movie'].value;
+  event.target['movie'].value = "";
+
+  console.log(newMovieId)
+  
+  if(newMovieId.includes("www.themoviedb.org/movie/")){
+    const match = newMovieId.match(/\/movie\/(\d+)/);
+    newMovieId = match[1];
+    console.log(newMovieId);
+  }
+  
+  if(movies.some(element => element.id === newMovieId)){
+    alert("Esse filme já foi adicionado");
+    return;
+  }
+
+  getMovieData(newMovieId);
 
 })
 
