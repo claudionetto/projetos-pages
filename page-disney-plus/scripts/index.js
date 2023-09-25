@@ -43,16 +43,17 @@ function setMainMovie(movie) {
   description.innerHTML = movie.overview;
   infos.innerHTML = movie.yearReleased + " - " + movie.genre + " - Movie";
 
-  if(movie.trailer === ""){
+  if (movie.trailer === "") {
     buttonTrailer.setAttribute(
       "href",
-      `https://www.youtube.com/results?search_query=${movie.title}+trailer`)
+      `https://www.youtube.com/results?search_query=${movie.title}+trailer`
+    );
+  } else {
+    buttonTrailer.setAttribute(
+      "href",
+      `https://www.youtube.com/watch?v=${movie.trailer}`
+    );
   }
-   else {
-    buttonTrailer.setAttribute(
-      "href",
-      `https://www.youtube.com/watch?v=${movie.trailer}`)
-  };
 
   appImage.setAttribute("src", movie.image.original);
 
@@ -121,7 +122,7 @@ async function getMovieData(movie) {
         const movieData = {
           id: movie,
           title: data.title,
-          genre: data.genres[0].name,
+          genre: data.genres[0]?.name,
           overview: data.overview,
           vote_average: data.vote_average.toFixed(1),
           yearReleased: data.release_date.split("-")[0],
@@ -140,13 +141,13 @@ async function getMovieData(movie) {
         addMovieInList(movieData);
       });
   } catch (error) {
-    console.log("erro", error);
-    alert("Insira um URL válido do site The Movie DB");
+    console.error("Erro geral:", error);
+    alert("Filme não encontrado, verifique e tente novamente");
   }
 }
 
 function loadMovies() {
-  const LIST_MOVIES = ["tt12801262", "tt4823776", "tt0800369", "980489"];
+  const LIST_MOVIES = [980489];
 
   LIST_MOVIES.map(async (movie, index) => {
     await getMovieData(movie);
@@ -163,49 +164,56 @@ const addMovieForm = document.getElementById("add-movie");
 addMovieForm.addEventListener("submit", (event) => {
   event.preventDefault();
 
-  // let newMovieId = event.target['movie'].value;
-  // event.target['movie'].value = "";
+  let newMovie = event.target["movie"].value;
+  event.target["movie"].value = "";
 
-  // console.log(newMovieId)
-  
-  // if(newMovieId.includes("www.themoviedb.org/movie/")){
-  //   const match = newMovieId.match(/\/movie\/(\d+)/);
-  //   newMovieId = match[1];
-  //   console.log(newMovieId);
-  // }
-  
-  // if(movies.some(element => element.id === newMovieId)){
-  //   alert("Esse filme já foi adicionado");
-  //   return;
-  // }
+  if (newMovie.includes("www.themoviedb.org/movie/")) {
+    const match = newMovie.match(/\/movie\/(\d+)/);
+    newMovie = match[1];
+  }
 
-  // getMovieData(newMovieId);
+  if(isMovieInList(newMovie)){
+    return;
+  }
 
-  searchMovieId(event.target["movie"].value).then((id) => {
-    console.log("ID do filme:", id);
-    getMovieData(id);
+  if (isNumeric(newMovie)) {
+    getMovieData(newMovie);
+    return;
+  }
+
+  searchMovieId(newMovie)
+  .then((results) => {
+    if(isMovieInList(results)){
+      return;
+    }
+    getMovieData(results);
   })
-  .catch((error) => {
-    console.error("Erro geral:", error);
-  });
 
-  // getMovieData(  searchMovieId(event.target["movie"].value)
-  // .then((id) => {
-  //   console.log("ID do filme:", id);
-  // })
-  // .catch((error) => {
-  //   console.error("Erro geral:", error);
-  // }));
 });
 
-async function searchMovieId(name) {
+async function searchMovieId(name, pageNumber = 1) {
   return await fetch(
-    `https://api.themoviedb.org/3/search/movie?query=${name}&api_key=fe72f214d62869bea6b720726f0d1807`
+    `https://api.themoviedb.org/3/search/movie?query=${name}&api_key=fe72f214d62869bea6b720726f0d1807&page=${pageNumber}`
   )
     .then((response) => response.json())
     .then((data) => {
-      return data.results[0].id;
-    });
-  } 
+      return data.results[0]?.id;
+    })
+
+}
+
+function isMovieInList(newMovie) {
+  if (movies.some((element) => element.id === newMovie)) {
+    
+    alert("Esse filme já foi adicionado");
+    return true;
+  }
+  
+  return false;
+}
+
+function isNumeric(value) {
+  return /^[0-9]+$/.test(value);
+}
 
 loadMovies();
