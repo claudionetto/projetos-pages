@@ -48,9 +48,11 @@
               placeholder="Adicione o seu filme"
               name="movie"
             />
-            <button type="submit" >+</button>
+            <button type="submit">+</button>
           </form>
-          <ul class="navigation__movies" id="navigation__movies"></ul>
+          <div class="movies__container">
+            <ul class="navigation__movies" id="navigation__movies"></ul>
+          </div>
         </nav>
       </header>
 
@@ -66,10 +68,12 @@
             Luca and Alberto dream of a life freedom, a life of adventure - and,
             most of all, a life with a Vespa to ride
           </p>
-          <button>
-            <img src="./assets/icon-play.png" alt="Icon Play" />
-            Assistir agora
-          </button>
+          <a id="trailer_link" target="_blank" href="https://www.youtube.com/">
+            <button>
+              <img src="./assets/icon-play.png" alt="Icon Play" />
+              Assistir Agora
+            </button>
+          </a>
         </section>
 
         <!-- <aside class="movies">
