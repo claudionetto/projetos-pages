@@ -1,6 +1,14 @@
-
-
 /*=============== LOADER ===============*/
+
+onload = () => {
+  const load = document.getElementById('load');
+  document.body.style.overflow = 'hidden';
+
+  setTimeout(() => {
+    load.style.display = 'none';
+    document.body.style.overflow = 'auto';
+  }, 2500);
+}
 
 /*=============== SHOW MENU ===============*/
 
@@ -22,38 +30,99 @@ if (navClose) {
 
 /*=============== REMOVE MENU MOBILE ===============*/
 
-const navLinks = document.querySelectorAll('.nav__link');
+const navLinks = document.querySelectorAll(".nav__link");
 
-function linkAction(){
-    navMenu.classList.remove("show-menu");
+function linkAction() {
+  navMenu.classList.remove("show-menu");
 }
 
 navLinks.forEach((element) => {
-    element.addEventListener('click', linkAction);
-})
+  element.addEventListener("click", linkAction);
+});
 
 /*=============== CHANGE BACKGROUND HEADER ===============*/
 
-function scrollHeader(){
-    const header = document.getElementById('header')
+function scrollHeader() {
+  const header = document.getElementById("header");
 
-    console.log(scrollY);
-
-    if(this.scrollY >= 50){
-        header.classList.add('scroll-header')
-    } else {
-        header.classList.remove('scroll-header')
-    }
+  if (this.scrollY >= 50) {
+    header.classList.add("scroll-header");
+  } else {
+    header.classList.remove("scroll-header");
+  }
 }
 
-window.addEventListener('scroll', scrollHeader);
+window.addEventListener("scroll", scrollHeader);
 
 /*=============== MIXITUP FILTER PRODUCTS ===============*/
 
+let mixerProducts = mixitup(".products__content", {
+  selectors: {
+    target: ".products__card",
+  },
+  animation: {
+    duration: 300,
+  },
+});
+
 /* Default filter products */
+
+mixerProducts.filter(".delicacies");
 
 /* Link active products */
 
+const linkProducts = document.querySelectorAll(".products__item");
+
+function activeProducts() {
+  linkProducts.forEach((element) => {
+    element.classList.remove("active-product");
+  });
+
+  this.classList.add("active-product");
+}
+
+linkProducts.forEach((element) => {
+  element.addEventListener("click", activeProducts);
+});
+
 /*=============== SHOW SCROLL UP ===============*/
 
+function showScrollUp() {
+  const scrollUp = document.getElementById("scroll-up");
+
+  if (this.scrollY >= 350) {
+    scrollUp.classList.add("show-scroll");
+  } else {
+    scrollUp.classList.remove("show-scroll");
+  }
+}
+
+window.addEventListener("scroll", showScrollUp);
+
 /*=============== SCROLL SECTIONS ACTIVE LINK ===============*/
+
+const sections = document.querySelectorAll("section[id]");
+
+function scrollActive() {
+  const scrollY = window.scrollY;
+
+  sections.forEach((current) => {
+    const sectionHeight = current.offsetHeight,
+      sectionTop = current.offsetTop - 58,
+      sectionId = current.getAttribute("id");
+
+    if (scrollY > sectionTop && scrollY <= sectionTop + sectionHeight) {
+      document
+        .querySelector(`.nav__menu a[href*="${sectionId}"]`)
+        .classList.add("active-link");
+
+    } else {
+      
+      document
+        .querySelector(`.nav__menu a[href*="${sectionId}"]`)
+        .classList.remove("active-link");
+    }
+  });
+}
+
+window.addEventListener('scroll', scrollActive);
